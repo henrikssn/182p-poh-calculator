@@ -18,7 +18,7 @@ document.addEventListener("DOMContentLoaded", () => {
             document.getElementById(targetTab).classList.add("active");
             
             // Re-render canvas if switching to W&B tab
-            if (targetTab === "wb-tab") {
+            if (targetTab === "wb") {
                 setTimeout(updateWeightAndBalance, 100);
             }
             
@@ -544,26 +544,26 @@ document.addEventListener("DOMContentLoaded", () => {
     ];
 
     const TAB_INPUT_MAPS = {
-        "dist-tab": {
+        "dist": {
             "dist-weight": "weight",
             "dist-alt": "alt",
             "dist-temp": "temp",
             "dist-runway": "runway",
             "dist-wind": "wind"
         },
-        "climb-tab": {
+        "climb": {
             "cl-alt": "alt",
             "cl-temp": "temp",
             "cl-aptelev": "aptelev",
             "cl-wind": "wind"
         },
-        "cruise-tab": {
+        "cruise": {
             "cr-alt": "alt",
             "cr-temp": "temp",
             "cr-rpm": "rpm",
             "cr-power-target": "power"
         },
-        "wb-tab": {
+        "wb": {
             "wb-empty-w": "empty-w",
             "wb-empty-m": "empty-m",
             "wb-front": "front",
@@ -579,7 +579,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const state = {};
         const params = new URLSearchParams();
         
-        const activeTab = document.querySelector(".nav-item.active")?.getAttribute("data-tab") || "dist-tab";
+        const activeTab = document.querySelector(".nav-item.active")?.getAttribute("data-tab") || "dist";
         state["activeTab"] = activeTab;
         params.set("tab", activeTab);
         
@@ -604,7 +604,7 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         }
         
-        if (activeTab === "climb-tab") {
+        if (activeTab === "climb") {
             params.set("profile", climbProfile);
             params.set("trip", clTripEnable.checked ? "1" : "0");
         }
@@ -627,14 +627,19 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         }
         
-        let targetTab = "dist-tab";
+        let targetTab = "dist";
         if (hasUrlParams && urlParams.get("tab")) {
             targetTab = urlParams.get("tab");
         } else if (state["activeTab"] !== undefined) {
             targetTab = state["activeTab"];
         }
-        if (targetTab === "takeoff-tab" || targetTab === "landing-tab") {
-            targetTab = "dist-tab";
+        
+        // Migrate legacy states with -tab suffix
+        if (targetTab.endsWith("-tab")) {
+            targetTab = targetTab.replace("-tab", "");
+        }
+        if (targetTab === "takeoff" || targetTab === "landing") {
+            targetTab = "dist";
         }
         
         const activeItem = document.querySelector(`.nav-item[data-tab="${targetTab}"]`);
@@ -661,7 +666,7 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         });
         
-        if (targetTab === "climb-tab" && hasUrlParams && urlParams.has("profile")) {
+        if (targetTab === "climb" && hasUrlParams && urlParams.has("profile")) {
             climbProfile = urlParams.get("profile");
         } else if (state["climbProfile"] !== undefined) {
             climbProfile = state["climbProfile"];
@@ -674,7 +679,7 @@ document.addEventListener("DOMContentLoaded", () => {
             btnNormal.classList.remove("active");
         }
         
-        if (targetTab === "climb-tab" && hasUrlParams && urlParams.has("trip")) {
+        if (targetTab === "climb" && hasUrlParams && urlParams.has("trip")) {
             clTripEnable.checked = urlParams.get("trip") === "1";
         } else if (state["clTripEnabled"] !== undefined) {
             clTripEnable.checked = state["clTripEnabled"];
