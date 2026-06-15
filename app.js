@@ -140,13 +140,12 @@ document.addEventListener("DOMContentLoaded", () => {
             document.getElementById("cl-roc").textContent = Math.round(res.roc_fpm);
             document.getElementById("cl-tas").textContent = Math.round(res.tas_kt);
             document.getElementById("cl-gs").textContent = Math.round(res.gs_kt);
-            document.getElementById("cl-grad").textContent = `${res.gradient_pct}% (${Math.round(res.gradient_fpnm)} ft/NM / ${Math.round(res.gradient_fpnm * 0.16458)} m/km)`;
+            document.getElementById("cl-grad").textContent = `${res.gradient_pct}% (${Math.round(res.gradient_fpnm)} ft/NM)`;
             
             if (res.trip) {
                 document.getElementById("trip-time").textContent = res.trip.time_min;
                 document.getElementById("trip-fuel").textContent = res.trip.fuel_gal;
-                const d = res.trip.dist_nm;
-                document.getElementById("trip-dist").textContent = `${d} NM (${(d * 1.852).toFixed(1)} km)`;
+                document.getElementById("trip-dist").textContent = `${res.trip.dist_nm} NM`;
             }
         } else {
             document.getElementById("cl-kias").textContent = "-";
