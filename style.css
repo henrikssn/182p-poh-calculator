@@ -367,6 +367,10 @@ body {
     color: rgba(255, 255, 255, 0.8);
 }
 
+.result-tile.highlighted .tile-unit {
+    color: rgba(255, 255, 255, 0.8);
+}
+
 .tile-val {
     font-size: 20px;
     font-weight: 700;

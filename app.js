@@ -44,11 +44,15 @@ document.addEventListener("DOMContentLoaded", () => {
         if (res) {
             const roll = Math.round(res.ground_roll);
             const total = Math.round(res.total_to_50ft);
-            document.getElementById("to-roll").textContent = `${roll} ft (${Math.round(roll * 0.3048)} m)`;
-            document.getElementById("to-total").textContent = `${total} ft (${Math.round(total * 0.3048)} m)`;
+            document.getElementById("to-roll").textContent = `${roll} ft`;
+            document.getElementById("to-roll-m").textContent = `${Math.round(roll * 0.3048)} m`;
+            document.getElementById("to-total").textContent = `${total} ft`;
+            document.getElementById("to-total-m").textContent = `${Math.round(total * 0.3048)} m`;
         } else {
             document.getElementById("to-roll").textContent = "N/A";
+            document.getElementById("to-roll-m").textContent = "";
             document.getElementById("to-total").textContent = "N/A";
+            document.getElementById("to-total-m").textContent = "";
         }
     }
     
@@ -71,11 +75,15 @@ document.addEventListener("DOMContentLoaded", () => {
         if (res) {
             const roll = Math.round(res.ground_roll);
             const total = Math.round(res.total_to_50ft);
-            document.getElementById("ld-roll").textContent = `${roll} ft (${Math.round(roll * 0.3048)} m)`;
-            document.getElementById("ld-total").textContent = `${total} ft (${Math.round(total * 0.3048)} m)`;
+            document.getElementById("ld-roll").textContent = `${roll} ft`;
+            document.getElementById("ld-roll-m").textContent = `${Math.round(roll * 0.3048)} m`;
+            document.getElementById("ld-total").textContent = `${total} ft`;
+            document.getElementById("ld-total-m").textContent = `${Math.round(total * 0.3048)} m`;
         } else {
             document.getElementById("ld-roll").textContent = "N/A";
+            document.getElementById("ld-roll-m").textContent = "";
             document.getElementById("ld-total").textContent = "N/A";
+            document.getElementById("ld-total-m").textContent = "";
         }
     }
     
@@ -235,6 +243,7 @@ document.addEventListener("DOMContentLoaded", () => {
             document.getElementById("cr-bhp").textContent = "-";
             document.getElementById("cr-tas").textContent = "-";
             document.getElementById("cr-ff").textContent = "N/A";
+            document.getElementById("cr-ff-pph").textContent = "";
             return;
         }
         
@@ -242,11 +251,13 @@ document.addEventListener("DOMContentLoaded", () => {
         if (res) {
             document.getElementById("cr-bhp").textContent = Math.round(res.bhp_percent);
             document.getElementById("cr-tas").textContent = Math.round(res.tas_kt);
-            document.getElementById("cr-ff").textContent = `${res.fuel_flow_gph} GPH (${Math.round(res.fuel_flow_pph)} PPH)`;
+            document.getElementById("cr-ff").textContent = `${res.fuel_flow_gph} GPH`;
+            document.getElementById("cr-ff-pph").textContent = `${Math.round(res.fuel_flow_pph)} PPH`;
         } else {
             document.getElementById("cr-bhp").textContent = "-";
             document.getElementById("cr-tas").textContent = "-";
             document.getElementById("cr-ff").textContent = "N/A";
+            document.getElementById("cr-ff-pph").textContent = "";
         }
     }
     
