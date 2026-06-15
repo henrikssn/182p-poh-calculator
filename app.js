@@ -180,9 +180,24 @@ document.addEventListener("DOMContentLoaded", () => {
         const alt = parseInt(crAlt.value);
         const availableMps = new Set();
         
+        // Find all unique altitudes in cruise_data
+        const dbAlts = new Set();
+        for (let key in POH_DATA.cruise_data) {
+            dbAlts.add(parseInt(key.split(",")[0]));
+        }
+        const sortedDbAlts = Array.from(dbAlts).sort((a, b) => a - b);
+        
+        // Find the largest database altitude <= selected alt (round down)
+        let targetAlt = sortedDbAlts[0];
+        for (let a of sortedDbAlts) {
+            if (a <= alt) {
+                targetAlt = a;
+            }
+        }
+        
         for (let key in POH_DATA.cruise_data) {
             const parts = key.split(",");
-            if (parseInt(parts[0]) === alt) {
+            if (parseInt(parts[0]) === targetAlt) {
                 availableMps.add(parseFloat(parts[3]));
             }
         }
