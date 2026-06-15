@@ -564,7 +564,8 @@ body {
     font-weight: 500;
     cursor: pointer;
     transition: color 0.2s;
-    width: 60px;
+    flex: 1;
+    max-width: 120px;
 }
 
 .nav-icon {

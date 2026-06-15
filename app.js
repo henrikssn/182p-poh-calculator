@@ -26,24 +26,39 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     });
     
-    // TAKEOFF TAB Logic
-    const toWeight = document.getElementById("to-weight");
-    const toAlt = document.getElementById("to-alt");
-    const toTemp = document.getElementById("to-temp");
+    // DISTANCES (TAKEOFF & LANDING) TAB Logic
+    const distWeight = document.getElementById("dist-weight");
+    const distAlt = document.getElementById("dist-alt");
+    const distTemp = document.getElementById("dist-temp");
+    const distRunway = document.getElementById("dist-runway");
+    const distWind = document.getElementById("dist-wind");
     
-    function updateTakeoff() {
-        const w = parseFloat(toWeight.value);
-        const alt = parseFloat(toAlt.value);
-        const temp = parseFloat(toTemp.value);
+    function updateDistances() {
+        const w = parseFloat(distWeight.value);
+        const alt = parseFloat(distAlt.value);
+        const temp = parseFloat(distTemp.value);
+        const runway = distRunway.value;
+        const wind = parseFloat(distWind.value);
         
-        document.getElementById("val-to-weight").textContent = w;
-        document.getElementById("val-to-alt").textContent = alt;
-        document.getElementById("val-to-temp").textContent = temp;
+        document.getElementById("val-dist-weight").textContent = w;
+        document.getElementById("val-dist-alt").textContent = alt;
+        document.getElementById("val-dist-temp").textContent = temp;
+        document.getElementById("val-dist-wind").textContent = Math.abs(wind);
         
-        const res = calc.getTakeoff(w, alt, temp);
-        if (res) {
-            const roll = Math.round(res.ground_roll);
-            const total = Math.round(res.total_to_50ft);
+        const windDirLbl = document.getElementById("lbl-dist-wind-dir");
+        if (wind > 0) {
+            windDirLbl.textContent = "KT headwind";
+        } else if (wind < 0) {
+            windDirLbl.textContent = "KT tailwind";
+        } else {
+            windDirLbl.textContent = "KT wind";
+        }
+        
+        // 1. Takeoff Distance
+        const toRes = calc.getTakeoff(w, alt, temp, runway, wind);
+        if (toRes) {
+            const roll = Math.round(toRes.ground_roll);
+            const total = Math.round(toRes.total_to_50ft);
             document.getElementById("to-roll").textContent = `${roll} ft`;
             document.getElementById("to-roll-m").textContent = `${Math.round(roll * 0.3048)} m`;
             document.getElementById("to-total").textContent = `${total} ft`;
@@ -54,27 +69,12 @@ document.addEventListener("DOMContentLoaded", () => {
             document.getElementById("to-total").textContent = "N/A";
             document.getElementById("to-total-m").textContent = "";
         }
-    }
-    
-    toWeight.addEventListener("input", updateTakeoff);
-    toAlt.addEventListener("input", updateTakeoff);
-    toTemp.addEventListener("input", updateTakeoff);
-    
-    // LANDING TAB Logic
-    const ldAlt = document.getElementById("ld-alt");
-    const ldTemp = document.getElementById("ld-temp");
-    
-    function updateLanding() {
-        const alt = parseFloat(ldAlt.value);
-        const temp = parseFloat(ldTemp.value);
         
-        document.getElementById("val-ld-alt").textContent = alt;
-        document.getElementById("val-ld-temp").textContent = temp;
-        
-        const res = calc.getLanding(alt, temp);
-        if (res) {
-            const roll = Math.round(res.ground_roll);
-            const total = Math.round(res.total_to_50ft);
+        // 2. Landing Distance
+        const ldRes = calc.getLanding(alt, temp, runway, wind);
+        if (ldRes) {
+            const roll = Math.round(ldRes.ground_roll);
+            const total = Math.round(ldRes.total_to_50ft);
             document.getElementById("ld-roll").textContent = `${roll} ft`;
             document.getElementById("ld-roll-m").textContent = `${Math.round(roll * 0.3048)} m`;
             document.getElementById("ld-total").textContent = `${total} ft`;
@@ -87,8 +87,11 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
     
-    ldAlt.addEventListener("input", updateLanding);
-    ldTemp.addEventListener("input", updateLanding);
+    distWeight.addEventListener("input", updateDistances);
+    distAlt.addEventListener("input", updateDistances);
+    distTemp.addEventListener("input", updateDistances);
+    distRunway.addEventListener("change", updateDistances);
+    distWind.addEventListener("input", updateDistances);
     
     // CLIMB TAB Logic
     let climbProfile = "normal";
@@ -483,8 +486,7 @@ document.addEventListener("DOMContentLoaded", () => {
     
     // State persistence
     const PERSISTENT_INPUTS = [
-        "to-weight", "to-alt", "to-temp",
-        "ld-alt", "ld-temp",
+        "dist-weight", "dist-alt", "dist-temp", "dist-runway", "dist-wind",
         "cl-alt", "cl-temp", "cl-aptelev", "cl-wind",
         "cr-alt", "cr-temp", "cr-rpm", "cr-mp",
         "wb-empty-w", "wb-empty-m", "wb-front", "wb-rear", "wb-bag-a", "wb-bag-b", "wb-fuel", "wb-fuel-burn"
@@ -542,7 +544,10 @@ document.addEventListener("DOMContentLoaded", () => {
                 savedMp = state["cr-mp"];
             }
             if (state["activeTab"] !== undefined) {
-                const targetTab = state["activeTab"];
+                let targetTab = state["activeTab"];
+                if (targetTab === "takeoff-tab" || targetTab === "landing-tab") {
+                    targetTab = "dist-tab";
+                }
                 const activeItem = document.querySelector(`.nav-item[data-tab="${targetTab}"]`);
                 if (activeItem) {
                     navItems.forEach(i => i.classList.remove("active"));
@@ -572,8 +577,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Initial runs to populate all results
     loadState();
-    updateTakeoff();
-    updateLanding();
+    updateDistances();
     updateClimb();
     updateManifoldPressures();
     updateCruise();

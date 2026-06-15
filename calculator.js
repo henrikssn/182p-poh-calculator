@@ -66,19 +66,63 @@ class POHCalculator {
         this.data = pohData;
     }
     
-    getTakeoff(weight, alt, temp) {
+    getTakeoff(weight, alt, temp, runway = "paved", wind = 0) {
         let res = interpolateRecursive(this.data.takeoff_dims, this.data.takeoff_data, [weight, alt, temp]);
         if (res) {
-            return { ground_roll: res[0], total_to_50ft: res[1] };
+            let roll = res[0];
+            let total = res[1];
+            
+            // Apply wind correction
+            if (wind > 0) {
+                let factor = 1.0 - 0.10 * (wind / 9.0);
+                roll *= factor;
+                total *= factor;
+            } else if (wind < 0) {
+                let tailwind = Math.min(10.0, -wind);
+                let factor = 1.0 + 0.10 * (tailwind / 2.0);
+                roll *= factor;
+                total *= factor;
+            }
+            
+            // Apply runway material correction (grass adds 15% of ground roll to both roll and total)
+            if (runway === "grass") {
+                let correction = roll * 0.15;
+                roll += correction;
+                total += correction;
+            }
+            
+            return { ground_roll: roll, total_to_50ft: total };
         }
         return null;
     }
     
-    getLanding(alt, temp) {
+    getLanding(alt, temp, runway = "paved", wind = 0) {
         // Landing is evaluated at fixed landing weight 2950 lbs
         let res = interpolateRecursive(this.data.landing_dims, this.data.landing_data, [2950, alt, temp]);
         if (res) {
-            return { ground_roll: res[0], total_to_50ft: res[1] };
+            let roll = res[0];
+            let total = res[1];
+            
+            // Apply wind correction
+            if (wind > 0) {
+                let factor = 1.0 - 0.10 * (wind / 9.0);
+                roll *= factor;
+                total *= factor;
+            } else if (wind < 0) {
+                let tailwind = Math.min(10.0, -wind);
+                let factor = 1.0 + 0.10 * (tailwind / 2.0);
+                roll *= factor;
+                total *= factor;
+            }
+            
+            // Apply runway material correction (grass adds 45% of ground roll to both roll and total)
+            if (runway === "grass") {
+                let correction = roll * 0.45;
+                roll += correction;
+                total += correction;
+            }
+            
+            return { ground_roll: roll, total_to_50ft: total };
         }
         return null;
     }

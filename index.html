@@ -20,25 +20,47 @@
     </header>
 
     <main class="app-content">
-        <!-- TAKEOFF SECTION -->
-        <section id="takeoff-tab" class="tab-content active">
+        <!-- DISTANCES SECTION (COMBINED TAKEOFF & LANDING) -->
+        <section id="dist-tab" class="tab-content active">
+            <!-- Settings Card -->
+            <div class="card">
+                <h2>Distance Settings</h2>
+                <p class="card-subtitle">Set airport conditions for takeoff and landing calculations.</p>
+                
+                <div class="input-group">
+                    <label>Pressure Altitude: <span id="val-dist-alt">0</span> ft</label>
+                    <input type="range" id="dist-alt" min="0" max="8000" step="100" value="0" class="slider">
+                </div>
+                
+                <div class="input-group">
+                    <label>Temperature: <span id="val-dist-temp">15</span> °C</label>
+                    <input type="range" id="dist-temp" min="-20" max="40" step="1" value="15" class="slider">
+                </div>
+
+                <div class="input-row">
+                    <div class="input-col">
+                        <label for="dist-runway">Runway Material</label>
+                        <select id="dist-runway" class="select-input">
+                            <option value="paved" selected>Paved (Dry)</option>
+                            <option value="grass">Dry Grass</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <label>Wind: <span id="val-dist-wind">0</span> KT <span id="lbl-dist-wind-dir"></span></label>
+                    <input type="range" id="dist-wind" min="-10" max="30" step="1" value="0" class="slider">
+                </div>
+            </div>
+
+            <!-- Takeoff Card -->
             <div class="card">
                 <h2>Takeoff Distance</h2>
-                <p class="card-subtitle">Calculate ground roll and obstacle clearance distance.</p>
+                <p class="card-subtitle">Calculated at selected takeoff weight and linked airport conditions.</p>
                 
-                <div class="input-group">
-                    <label>Weight: <span id="val-to-weight">2950</span> lbs</label>
-                    <input type="range" id="to-weight" min="2200" max="3100" step="50" value="2950" class="slider">
-                </div>
-                
-                <div class="input-group">
-                    <label>Pressure Altitude: <span id="val-to-alt">0</span> ft</label>
-                    <input type="range" id="to-alt" min="0" max="8000" step="100" value="0" class="slider">
-                </div>
-                
-                <div class="input-group">
-                    <label>Temperature: <span id="val-to-temp">15</span> °C</label>
-                    <input type="range" id="to-temp" min="-20" max="40" step="1" value="15" class="slider">
+                <div class="input-group" style="margin-bottom: 24px;">
+                    <label>Takeoff Weight: <span id="val-dist-weight">2950</span> lbs</label>
+                    <input type="range" id="dist-weight" min="2200" max="3100" step="50" value="2950" class="slider">
                 </div>
 
                 <div class="results-container">
@@ -54,24 +76,12 @@
                     </div>
                 </div>
             </div>
-        </section>
 
-        <!-- LANDING SECTION -->
-        <section id="landing-tab" class="tab-content">
+            <!-- Landing Card -->
             <div class="card">
                 <h2>Landing Distance</h2>
-                <p class="card-subtitle">Calculated at standard landing weight of 2950 lbs.</p>
+                <p class="card-subtitle">Calculated at standard landing weight of 2950 lbs and linked airport conditions.</p>
                 
-                <div class="input-group">
-                    <label>Pressure Altitude: <span id="val-ld-alt">0</span> ft</label>
-                    <input type="range" id="ld-alt" min="0" max="8000" step="100" value="0" class="slider">
-                </div>
-                
-                <div class="input-group">
-                    <label>Temperature: <span id="val-ld-temp">15</span> °C</label>
-                    <input type="range" id="ld-temp" min="-20" max="40" step="1" value="15" class="slider">
-                </div>
-
                 <div class="results-container">
                     <div class="result-box">
                         <span class="result-label">Ground Roll</span>
@@ -340,13 +350,9 @@
 
     <!-- BOTTOM TAB NAVIGATION -->
     <nav class="app-nav">
-        <button class="nav-item active" data-tab="takeoff-tab">
-            <span class="nav-icon">🛫</span>
-            <span class="nav-text">Takeoff</span>
-        </button>
-        <button class="nav-item" data-tab="landing-tab">
-            <span class="nav-icon">🛬</span>
-            <span class="nav-text">Landing</span>
+        <button class="nav-item active" data-tab="dist-tab">
+            <span class="nav-icon">✈️</span>
+            <span class="nav-text">Takeoff & Landing</span>
         </button>
         <button class="nav-item" data-tab="climb-tab">
             <span class="nav-icon">⛰</span>
