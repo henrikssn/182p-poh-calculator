@@ -185,95 +185,146 @@ document.addEventListener("DOMContentLoaded", () => {
     // CRUISE TAB Logic
     const crAlt = document.getElementById("cr-alt");
     const crTemp = document.getElementById("cr-temp");
+    const crPowerTarget = document.getElementById("cr-power-target");
     const crRpm = document.getElementById("cr-rpm");
-    const crMp = document.getElementById("cr-mp");
-    
-    let savedMp = null;
-    
-    function updateManifoldPressures() {
-        const alt = parseInt(crAlt.value);
-        const availableMps = new Set();
+
+    function getMaxMp(alt) {
+        const dbAlts = [2000, 4000, 6000, 8000, 10000, 12000];
+        const maxMps = {
+            2000: 23.0,
+            4000: 23.0,
+            6000: 23.0,
+            8000: 21.0,
+            10000: 20.0,
+            12000: 18.0
+        };
         
-        // Find all unique altitudes in cruise_data
-        const dbAlts = new Set();
-        for (let key in POH_DATA.cruise_data) {
-            dbAlts.add(parseInt(key.split(",")[0]));
+        if (alt <= 2000) return 23.0;
+        if (alt >= 12000) return 18.0;
+        
+        for (let i = 0; i < dbAlts.length - 1; i++) {
+            let a1 = dbAlts[i];
+            let a2 = dbAlts[i + 1];
+            if (a1 <= alt && alt <= a2) {
+                let f = (alt - a1) / (a2 - a1);
+                let m1 = maxMps[a1];
+                let m2 = maxMps[a2];
+                return m1 + f * (m2 - m1);
+            }
         }
-        const sortedDbAlts = Array.from(dbAlts).sort((a, b) => a - b);
-        
-        // Find the largest database altitude <= selected alt (round down)
-        let targetAlt = sortedDbAlts[0];
-        for (let a of sortedDbAlts) {
-            if (a <= alt) {
-                targetAlt = a;
+        return 23.0;
+    }
+
+    function solveMpForPower(alt, temp, rpm, targetBhp) {
+        let validMps = [];
+        for (let mp = 15.0; mp <= 23.05; mp += 0.1) {
+            let res = calc.getCruise(alt, temp, rpm, mp);
+            if (res !== null) {
+                validMps.push({ mp: mp, bhp: res.bhp_percent });
             }
         }
         
-        for (let key in POH_DATA.cruise_data) {
-            const parts = key.split(",");
-            if (parseInt(parts[0]) === targetAlt) {
-                availableMps.add(parseFloat(parts[3]));
-            }
+        if (validMps.length === 0) {
+            return null;
         }
         
-        const sortedMps = Array.from(availableMps).sort((a, b) => b - a); // descending
-        crMp.innerHTML = "";
+        let minMpObj = validMps[0];
+        let maxMpObj = validMps[validMps.length - 1];
         
-        sortedMps.forEach(mp => {
-            const opt = document.createElement("option");
-            opt.value = mp;
-            opt.textContent = mp.toFixed(1);
-            if (savedMp !== null && parseFloat(savedMp) === mp) {
-                opt.selected = true;
-            } else if (savedMp === null && (mp === 22.0 || mp === 23.0)) {
-                opt.selected = true;
-            }
-            crMp.appendChild(opt);
-        });
+        const physicalMaxMp = getMaxMp(alt);
+        let maxMpVal = Math.min(maxMpObj.mp, physicalMaxMp);
+        let maxBhpRes = calc.getCruise(alt, temp, rpm, maxMpVal);
+        let maxBhp = maxBhpRes ? maxBhpRes.bhp_percent : maxMpObj.bhp;
         
-        if (sortedMps.length > 0 && !crMp.value) {
-            crMp.selectedIndex = 0;
+        if (targetBhp <= minMpObj.bhp) {
+            let finalMp = Math.round(minMpObj.mp * 10) / 10;
+            return { mp: finalMp, bhp: minMpObj.bhp, isFullThrottle: false };
         }
+        if (targetBhp >= maxBhp) {
+            let finalMp = Math.round(maxMpVal * 10) / 10;
+            return { mp: finalMp, bhp: maxBhp, isFullThrottle: true };
+        }
+        
+        let low = minMpObj.mp;
+        let high = maxMpVal;
+        let iterations = 0;
+        while (high - low > 0.005 && iterations < 15) {
+            let mid = (low + high) / 2;
+            let res = calc.getCruise(alt, temp, rpm, mid);
+            if (res === null) {
+                high = mid;
+            } else {
+                if (res.bhp_percent < targetBhp) {
+                    low = mid;
+                } else {
+                    high = mid;
+                }
+            }
+            iterations++;
+        }
+        
+        let solvedMp = (low + high) / 2;
+        let roundedMp = Math.round(solvedMp * 10) / 10;
+        let finalRes = calc.getCruise(alt, temp, rpm, roundedMp);
+        
+        return {
+            mp: roundedMp,
+            bhp: finalRes ? finalRes.bhp_percent : targetBhp,
+            isFullThrottle: roundedMp >= Math.round(physicalMaxMp * 10) / 10
+        };
     }
     
     function updateCruise() {
         const alt = parseFloat(crAlt.value);
         const temp = parseFloat(crTemp.value);
         const rpm = parseFloat(crRpm.value);
-        const mp = parseFloat(crMp.value);
+        const targetBhp = parseFloat(crPowerTarget.value);
         
         document.getElementById("val-cr-alt").textContent = alt;
         document.getElementById("val-cr-temp").textContent = temp;
+        document.getElementById("val-cr-power-target").textContent = targetBhp;
         
-        if (!mp) {
-            document.getElementById("cr-bhp").textContent = "-";
-            document.getElementById("cr-tas").textContent = "-";
-            document.getElementById("cr-ff").textContent = "N/A";
-            document.getElementById("cr-ff-pph").textContent = "";
-            return;
-        }
+        const solution = solveMpForPower(alt, temp, rpm, targetBhp);
         
-        const res = calc.getCruise(alt, temp, rpm, mp);
-        if (res) {
-            document.getElementById("cr-bhp").textContent = Math.round(res.bhp_percent);
-            document.getElementById("cr-tas").textContent = Math.round(res.tas_kt);
-            document.getElementById("cr-ff").textContent = `${res.fuel_flow_gph} GPH`;
-            document.getElementById("cr-ff-pph").textContent = `${Math.round(res.fuel_flow_pph)} PPH`;
+        if (solution) {
+            const finalMp = solution.mp;
+            const finalRes = calc.getCruise(alt, temp, rpm, finalMp);
+            
+            if (finalRes) {
+                document.getElementById("cr-bhp").textContent = Math.round(finalRes.bhp_percent);
+                document.getElementById("cr-mp-val").textContent = finalMp.toFixed(1);
+                
+                const statusEl = document.getElementById("cr-mp-status");
+                if (solution.isFullThrottle) {
+                    statusEl.textContent = "in. Hg (FT)";
+                } else {
+                    statusEl.textContent = "in. Hg";
+                }
+                
+                document.getElementById("cr-tas").textContent = Math.round(finalRes.tas_kt);
+                document.getElementById("cr-ff").textContent = `${finalRes.fuel_flow_gph} GPH`;
+                document.getElementById("cr-ff-pph").textContent = `${Math.round(finalRes.fuel_flow_pph)} PPH`;
+            } else {
+                setCruiseEmpty();
+            }
         } else {
-            document.getElementById("cr-bhp").textContent = "-";
-            document.getElementById("cr-tas").textContent = "-";
-            document.getElementById("cr-ff").textContent = "N/A";
-            document.getElementById("cr-ff-pph").textContent = "";
+            setCruiseEmpty();
         }
     }
     
-    crAlt.addEventListener("input", () => {
-        updateManifoldPressures();
-        updateCruise();
-    });
+    function setCruiseEmpty() {
+        document.getElementById("cr-bhp").textContent = "-";
+        document.getElementById("cr-mp-val").textContent = "-";
+        document.getElementById("cr-mp-status").textContent = "in. Hg";
+        document.getElementById("cr-tas").textContent = "-";
+        document.getElementById("cr-ff").textContent = "N/A";
+        document.getElementById("cr-ff-pph").textContent = "";
+    }
+    
+    crAlt.addEventListener("input", updateCruise);
     crTemp.addEventListener("input", updateCruise);
+    crPowerTarget.addEventListener("input", updateCruise);
     crRpm.addEventListener("change", updateCruise);
-    crMp.addEventListener("change", updateCruise);
     
     // WEIGHT & BALANCE TAB Logic
     const wbEmptyW = document.getElementById("wb-empty-w");
@@ -488,7 +539,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const PERSISTENT_INPUTS = [
         "dist-weight", "dist-alt", "dist-temp", "dist-runway", "dist-wind",
         "cl-alt", "cl-temp", "cl-aptelev", "cl-wind",
-        "cr-alt", "cr-temp", "cr-rpm", "cr-mp",
+        "cr-alt", "cr-temp", "cr-rpm", "cr-power-target",
         "wb-empty-w", "wb-empty-m", "wb-front", "wb-rear", "wb-bag-a", "wb-bag-b", "wb-fuel", "wb-fuel-burn"
     ];
 
@@ -540,9 +591,6 @@ document.addEventListener("DOMContentLoaded", () => {
                     clTripResults.style.display = "none";
                 }
             }
-            if (state["cr-mp"] !== undefined) {
-                savedMp = state["cr-mp"];
-            }
             if (state["activeTab"] !== undefined) {
                 let targetTab = state["activeTab"];
                 if (targetTab === "takeoff-tab" || targetTab === "landing-tab") {
@@ -579,7 +627,6 @@ document.addEventListener("DOMContentLoaded", () => {
     loadState();
     updateDistances();
     updateClimb();
-    updateManifoldPressures();
     updateCruise();
     updateWeightAndBalance();
 });

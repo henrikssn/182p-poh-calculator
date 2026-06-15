@@ -210,22 +210,19 @@
                     <input type="range" id="cr-temp" min="-25" max="35" step="1" value="3" class="slider">
                 </div>
 
+                <div class="input-group">
+                    <label>Target Power: <span id="val-cr-power-target">65</span>% BHP</label>
+                    <input type="range" id="cr-power-target" min="45" max="75" step="1" value="65" class="slider">
+                </div>
+
                 <div class="input-row">
                     <div class="input-col">
                         <label for="cr-rpm">RPM</label>
                         <select id="cr-rpm" class="select-input">
-                            <option value="2100">2100</option>
                             <option value="2200">2200</option>
                             <option value="2300">2300</option>
                             <option value="2400" selected>2400</option>
-                            <option value="2500">2500</option>
-                            <option value="2600">2600</option>
-                        </select>
-                    </div>
-                    <div class="input-col">
-                        <label for="cr-mp">MP (in. Hg)</label>
-                        <select id="cr-mp" class="select-input">
-                            <!-- Populated dynamically based on alt -->
+                            <option value="2450">2450</option>
                         </select>
                     </div>
                 </div>
@@ -237,11 +234,16 @@
                         <span class="tile-unit">% BHP</span>
                     </div>
                     <div class="result-tile">
+                        <span class="tile-label">Manifold Pressure</span>
+                        <span class="tile-val" id="cr-mp-val">-</span>
+                        <span class="tile-unit" id="cr-mp-status">in. Hg</span>
+                    </div>
+                    <div class="result-tile">
                         <span class="tile-label">Cruise TAS</span>
                         <span class="tile-val" id="cr-tas">-</span>
                         <span class="tile-unit">KTAS</span>
                     </div>
-                    <div class="result-tile full-width highlighted">
+                    <div class="result-tile highlighted">
                         <span class="tile-label">Fuel Burn Rate</span>
                         <span class="tile-val" id="cr-ff">-</span>
                         <span class="tile-unit" id="cr-ff-pph">-</span>
