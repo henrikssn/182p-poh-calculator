@@ -21,6 +21,8 @@ document.addEventListener("DOMContentLoaded", () => {
             if (targetTab === "wb-tab") {
                 setTimeout(updateWeightAndBalance, 100);
             }
+            
+            saveState();
         });
     });
     
@@ -172,6 +174,8 @@ document.addEventListener("DOMContentLoaded", () => {
     const crRpm = document.getElementById("cr-rpm");
     const crMp = document.getElementById("cr-mp");
     
+    let savedMp = null;
+    
     function updateManifoldPressures() {
         const alt = parseInt(crAlt.value);
         const availableMps = new Set();
@@ -190,7 +194,9 @@ document.addEventListener("DOMContentLoaded", () => {
             const opt = document.createElement("option");
             opt.value = mp;
             opt.textContent = mp.toFixed(1);
-            if (mp === 22.0 || mp === 23.0) {
+            if (savedMp !== null && parseFloat(savedMp) === mp) {
+                opt.selected = true;
+            } else if (savedMp === null && (mp === 22.0 || mp === 23.0)) {
                 opt.selected = true;
             }
             crMp.appendChild(opt);
@@ -446,7 +452,97 @@ document.addEventListener("DOMContentLoaded", () => {
     wbFuel.addEventListener("input", updateWeightAndBalance);
     wbFuelBurn.addEventListener("input", updateWeightAndBalance);
     
+    // State persistence
+    const PERSISTENT_INPUTS = [
+        "to-weight", "to-alt", "to-temp",
+        "ld-alt", "ld-temp",
+        "cl-weight", "cl-alt", "cl-temp", "cl-aptelev", "cl-wind",
+        "cr-alt", "cr-temp", "cr-rpm", "cr-mp",
+        "wb-empty-w", "wb-empty-m", "wb-front", "wb-rear", "wb-bag-a", "wb-bag-b", "wb-fuel", "wb-fuel-burn"
+    ];
+
+    function saveState() {
+        const state = {};
+        PERSISTENT_INPUTS.forEach(id => {
+            const el = document.getElementById(id);
+            if (el) {
+                state[id] = el.value;
+            }
+        });
+        state["climbProfile"] = climbProfile;
+        state["clTripEnabled"] = clTripEnable.checked;
+        const activeTab = document.querySelector(".nav-item.active")?.getAttribute("data-tab");
+        if (activeTab) {
+            state["activeTab"] = activeTab;
+        }
+        localStorage.setItem("c182p_poh_config", JSON.stringify(state));
+    }
+
+    function loadState() {
+        const data = localStorage.getItem("c182p_poh_config");
+        if (!data) return;
+        try {
+            const state = JSON.parse(data);
+            PERSISTENT_INPUTS.forEach(id => {
+                const el = document.getElementById(id);
+                if (el && state[id] !== undefined) {
+                    el.value = state[id];
+                }
+            });
+            if (state["climbProfile"] !== undefined) {
+                climbProfile = state["climbProfile"];
+                if (climbProfile === "normal") {
+                    btnNormal.classList.add("active");
+                    btnMax.classList.remove("active");
+                } else {
+                    btnMax.classList.add("active");
+                    btnNormal.classList.remove("active");
+                }
+            }
+            if (state["clTripEnabled"] !== undefined) {
+                clTripEnable.checked = state["clTripEnabled"];
+                if (clTripEnable.checked) {
+                    clTripInputs.style.display = "block";
+                    clTripResults.style.display = "block";
+                } else {
+                    clTripInputs.style.display = "none";
+                    clTripResults.style.display = "none";
+                }
+            }
+            if (state["cr-mp"] !== undefined) {
+                savedMp = state["cr-mp"];
+            }
+            if (state["activeTab"] !== undefined) {
+                const targetTab = state["activeTab"];
+                const activeItem = document.querySelector(`.nav-item[data-tab="${targetTab}"]`);
+                if (activeItem) {
+                    navItems.forEach(i => i.classList.remove("active"));
+                    tabContents.forEach(c => c.classList.remove("active"));
+                    
+                    activeItem.classList.add("active");
+                    const tabEl = document.getElementById(targetTab);
+                    if (tabEl) tabEl.classList.add("active");
+                }
+            }
+        } catch (e) {
+            console.error("Failed to restore saved configuration:", e);
+        }
+    }
+
+    // Attach persistence save listeners
+    PERSISTENT_INPUTS.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) {
+            el.addEventListener("input", saveState);
+            el.addEventListener("change", saveState);
+        }
+    });
+    btnNormal.addEventListener("click", saveState);
+    btnMax.addEventListener("click", saveState);
+    clTripEnable.addEventListener("change", saveState);
+
     // Initial runs to populate all results
+    loadState();
     updateTakeoff();
     updateLanding();
     updateClimb();
