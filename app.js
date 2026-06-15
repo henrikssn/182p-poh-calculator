@@ -543,71 +543,148 @@ document.addEventListener("DOMContentLoaded", () => {
         "wb-empty-w", "wb-empty-m", "wb-front", "wb-rear", "wb-bag-a", "wb-bag-b", "wb-fuel", "wb-fuel-burn"
     ];
 
+    const TAB_INPUT_MAPS = {
+        "dist-tab": {
+            "dist-weight": "weight",
+            "dist-alt": "alt",
+            "dist-temp": "temp",
+            "dist-runway": "runway",
+            "dist-wind": "wind"
+        },
+        "climb-tab": {
+            "cl-alt": "alt",
+            "cl-temp": "temp",
+            "cl-aptelev": "aptelev",
+            "cl-wind": "wind"
+        },
+        "cruise-tab": {
+            "cr-alt": "alt",
+            "cr-temp": "temp",
+            "cr-rpm": "rpm",
+            "cr-power-target": "power"
+        },
+        "wb-tab": {
+            "wb-empty-w": "empty-w",
+            "wb-empty-m": "empty-m",
+            "wb-front": "front",
+            "wb-rear": "rear",
+            "wb-bag-a": "bag-a",
+            "wb-bag-b": "bag-b",
+            "wb-fuel": "fuel",
+            "wb-fuel-burn": "fuel-burn"
+        }
+    };
+
     function saveState() {
         const state = {};
+        const params = new URLSearchParams();
+        
+        const activeTab = document.querySelector(".nav-item.active")?.getAttribute("data-tab") || "dist-tab";
+        state["activeTab"] = activeTab;
+        params.set("tab", activeTab);
+        
         PERSISTENT_INPUTS.forEach(id => {
             const el = document.getElementById(id);
             if (el) {
                 state[id] = el.value;
             }
         });
+        
         state["climbProfile"] = climbProfile;
         state["clTripEnabled"] = clTripEnable.checked;
-        const activeTab = document.querySelector(".nav-item.active")?.getAttribute("data-tab");
-        if (activeTab) {
-            state["activeTab"] = activeTab;
-        }
         localStorage.setItem("c182p_poh_config", JSON.stringify(state));
+        
+        // Put only active tab settings in the URL
+        const activeMap = TAB_INPUT_MAPS[activeTab] || {};
+        for (let id in activeMap) {
+            const el = document.getElementById(id);
+            if (el) {
+                const paramName = activeMap[id];
+                params.set(paramName, el.value);
+            }
+        }
+        
+        if (activeTab === "climb-tab") {
+            params.set("profile", climbProfile);
+            params.set("trip", clTripEnable.checked ? "1" : "0");
+        }
+        
+        const newUrl = window.location.pathname + "?" + params.toString();
+        window.history.replaceState({}, "", newUrl);
     }
 
     function loadState() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const hasUrlParams = urlParams.has("tab");
+        
         const data = localStorage.getItem("c182p_poh_config");
-        if (!data) return;
-        try {
-            const state = JSON.parse(data);
-            PERSISTENT_INPUTS.forEach(id => {
-                const el = document.getElementById(id);
-                if (el && state[id] !== undefined) {
+        let state = {};
+        if (data) {
+            try {
+                state = JSON.parse(data);
+            } catch (e) {
+                console.error("Failed to parse localStorage configuration:", e);
+            }
+        }
+        
+        let targetTab = "dist-tab";
+        if (hasUrlParams && urlParams.get("tab")) {
+            targetTab = urlParams.get("tab");
+        } else if (state["activeTab"] !== undefined) {
+            targetTab = state["activeTab"];
+        }
+        if (targetTab === "takeoff-tab" || targetTab === "landing-tab") {
+            targetTab = "dist-tab";
+        }
+        
+        const activeItem = document.querySelector(`.nav-item[data-tab="${targetTab}"]`);
+        if (activeItem) {
+            navItems.forEach(i => i.classList.remove("active"));
+            tabContents.forEach(c => c.classList.remove("active"));
+            
+            activeItem.classList.add("active");
+            const tabEl = document.getElementById(targetTab);
+            if (tabEl) tabEl.classList.add("active");
+        }
+        
+        PERSISTENT_INPUTS.forEach(id => {
+            const el = document.getElementById(id);
+            if (el) {
+                const activeMap = TAB_INPUT_MAPS[targetTab] || {};
+                const paramName = activeMap[id];
+                
+                if (hasUrlParams && paramName && urlParams.has(paramName)) {
+                    el.value = urlParams.get(paramName);
+                } else if (state[id] !== undefined) {
                     el.value = state[id];
                 }
-            });
-            if (state["climbProfile"] !== undefined) {
-                climbProfile = state["climbProfile"];
-                if (climbProfile === "normal") {
-                    btnNormal.classList.add("active");
-                    btnMax.classList.remove("active");
-                } else {
-                    btnMax.classList.add("active");
-                    btnNormal.classList.remove("active");
-                }
             }
-            if (state["clTripEnabled"] !== undefined) {
-                clTripEnable.checked = state["clTripEnabled"];
-                if (clTripEnable.checked) {
-                    clTripInputs.style.display = "block";
-                    clTripResults.style.display = "block";
-                } else {
-                    clTripInputs.style.display = "none";
-                    clTripResults.style.display = "none";
-                }
-            }
-            if (state["activeTab"] !== undefined) {
-                let targetTab = state["activeTab"];
-                if (targetTab === "takeoff-tab" || targetTab === "landing-tab") {
-                    targetTab = "dist-tab";
-                }
-                const activeItem = document.querySelector(`.nav-item[data-tab="${targetTab}"]`);
-                if (activeItem) {
-                    navItems.forEach(i => i.classList.remove("active"));
-                    tabContents.forEach(c => c.classList.remove("active"));
-                    
-                    activeItem.classList.add("active");
-                    const tabEl = document.getElementById(targetTab);
-                    if (tabEl) tabEl.classList.add("active");
-                }
-            }
-        } catch (e) {
-            console.error("Failed to restore saved configuration:", e);
+        });
+        
+        if (targetTab === "climb-tab" && hasUrlParams && urlParams.has("profile")) {
+            climbProfile = urlParams.get("profile");
+        } else if (state["climbProfile"] !== undefined) {
+            climbProfile = state["climbProfile"];
+        }
+        if (climbProfile === "normal") {
+            btnNormal.classList.add("active");
+            btnMax.classList.remove("active");
+        } else {
+            btnMax.classList.add("active");
+            btnNormal.classList.remove("active");
+        }
+        
+        if (targetTab === "climb-tab" && hasUrlParams && urlParams.has("trip")) {
+            clTripEnable.checked = urlParams.get("trip") === "1";
+        } else if (state["clTripEnabled"] !== undefined) {
+            clTripEnable.checked = state["clTripEnabled"];
+        }
+        if (clTripEnable.checked) {
+            clTripInputs.style.display = "block";
+            clTripResults.style.display = "block";
+        } else {
+            clTripInputs.style.display = "none";
+            clTripResults.style.display = "none";
         }
     }
 
@@ -629,4 +706,5 @@ document.addEventListener("DOMContentLoaded", () => {
     updateClimb();
     updateCruise();
     updateWeightAndBalance();
+    saveState();
 });
