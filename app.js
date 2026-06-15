@@ -131,7 +131,8 @@ document.addEventListener("DOMContentLoaded", () => {
     });
     
     function updateClimb() {
-        const w = parseFloat(clWeight.value);
+        const w = 2950.0;
+        clWeight.value = 2950;
         const alt = parseFloat(clAlt.value);
         const temp = parseFloat(clTemp.value);
         const wind = parseFloat(clWind.value);
@@ -150,12 +151,13 @@ document.addEventListener("DOMContentLoaded", () => {
             document.getElementById("cl-roc").textContent = Math.round(res.roc_fpm);
             document.getElementById("cl-tas").textContent = Math.round(res.tas_kt);
             document.getElementById("cl-gs").textContent = Math.round(res.gs_kt);
-            document.getElementById("cl-grad").textContent = `${res.gradient_pct}% (${Math.round(res.gradient_fpnm)} ft/NM)`;
+            document.getElementById("cl-grad").textContent = `${res.gradient_pct}%`;
+            document.getElementById("cl-grad-fpnm").textContent = `${Math.round(res.gradient_fpnm)} ft/NM`;
             
             if (res.trip) {
                 document.getElementById("trip-time").textContent = res.trip.time_min;
                 document.getElementById("trip-fuel").textContent = res.trip.fuel_gal;
-                document.getElementById("trip-dist").textContent = `${res.trip.dist_nm} NM`;
+                document.getElementById("trip-dist").textContent = res.trip.dist_nm;
             }
         } else {
             document.getElementById("cl-kias").textContent = "-";
@@ -163,6 +165,7 @@ document.addEventListener("DOMContentLoaded", () => {
             document.getElementById("cl-tas").textContent = "-";
             document.getElementById("cl-gs").textContent = "-";
             document.getElementById("cl-grad").textContent = "N/A";
+            document.getElementById("cl-grad-fpnm").textContent = "";
             
             document.getElementById("trip-time").textContent = "-";
             document.getElementById("trip-fuel").textContent = "-";
@@ -482,7 +485,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const PERSISTENT_INPUTS = [
         "to-weight", "to-alt", "to-temp",
         "ld-alt", "ld-temp",
-        "cl-weight", "cl-alt", "cl-temp", "cl-aptelev", "cl-wind",
+        "cl-alt", "cl-temp", "cl-aptelev", "cl-wind",
         "cr-alt", "cr-temp", "cr-rpm", "cr-mp",
         "wb-empty-w", "wb-empty-m", "wb-front", "wb-rear", "wb-bag-a", "wb-bag-b", "wb-fuel", "wb-fuel-burn"
     ];
