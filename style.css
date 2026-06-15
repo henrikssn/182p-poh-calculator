@@ -1,0 +1,601 @@
+/* CSS Design System for Cessna 182P POH Web App */
+
+:root {
+    --bg-main: #0f172a;
+    --bg-card: #1e293b;
+    --bg-input: #334155;
+    --primary: #3b82f6;
+    --primary-hover: #60a5fa;
+    --primary-gradient: linear-gradient(135deg, #2563eb, #3b82f6);
+    --accent-success: #10b981;
+    --accent-warning: #f59e0b;
+    --accent-danger: #ef4444;
+    --text-main: #f8fafc;
+    --text-muted: #94a3b8;
+    --border-color: #334155;
+    --safe-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+}
+
+body {
+    font-family: 'Outfit', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background-color: var(--bg-main);
+    color: var(--text-main);
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    overflow: hidden;
+}
+
+/* Header */
+.app-header {
+    background-color: rgba(30, 41, 59, 0.75);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--border-color);
+    padding: 16px 20px;
+    padding-top: max(16px, env(safe-area-inset-top));
+    z-index: 10;
+}
+
+.logo-container {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.plane-icon {
+    font-size: 24px;
+    background: var(--primary-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.app-header h1 {
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+}
+
+/* Main Content Area */
+.app-content {
+    flex: 1;
+    overflow-y: auto;
+    padding: 20px;
+    padding-bottom: calc(90px + var(--safe-bottom));
+}
+
+/* Tabs Display */
+.tab-content {
+    display: none;
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+.tab-content.active {
+    display: block;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Premium Card Layout */
+.card {
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 20px;
+    padding: 24px;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3), 0 8px 10px -6px rgba(0, 0, 0, 0.3);
+    margin-bottom: 20px;
+}
+
+.card h2 {
+    font-size: 22px;
+    font-weight: 600;
+    margin-bottom: 6px;
+    letter-spacing: -0.3px;
+}
+
+.card-subtitle {
+    font-size: 14px;
+    color: var(--text-muted);
+    margin-bottom: 24px;
+}
+
+/* Form Controls & Sliders */
+.input-group {
+    margin-bottom: 20px;
+}
+
+.input-group label {
+    display: flex;
+    justify-content: space-between;
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--text-main);
+    margin-bottom: 10px;
+}
+
+.input-group label span {
+    font-weight: 700;
+    color: var(--primary-hover);
+}
+
+.slider {
+    -webkit-appearance: none;
+    width: 100%;
+    height: 8px;
+    border-radius: 4px;
+    background: var(--bg-input);
+    outline: none;
+    transition: background 0.2s;
+}
+
+.slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: var(--primary-gradient);
+    cursor: pointer;
+    box-shadow: 0 4px 10px rgba(37, 99, 235, 0.4);
+    border: 2px solid #ffffff;
+    transition: transform 0.1s;
+}
+
+.slider::-webkit-slider-thumb:active {
+    transform: scale(1.2);
+}
+
+/* Numerical & Select inputs */
+.input-row {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 20px;
+}
+
+.input-col {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.input-col label {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.num-input, .select-input {
+    background-color: var(--bg-input);
+    border: 1px solid var(--border-color);
+    color: var(--text-main);
+    padding: 12px 16px;
+    border-radius: 12px;
+    font-size: 16px;
+    font-weight: 500;
+    outline: none;
+    font-family: inherit;
+    transition: border-color 0.2s;
+    user-select: text;
+}
+
+.num-input:focus, .select-input:focus {
+    border-color: var(--primary);
+}
+
+/* Buttons and switch */
+.profile-switch {
+    display: flex;
+    background-color: var(--bg-input);
+    border-radius: 12px;
+    padding: 4px;
+    margin-bottom: 24px;
+}
+
+.switch-btn {
+    flex: 1;
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 600;
+    padding: 10px;
+    border-radius: 9px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.switch-btn.active {
+    background-color: var(--primary);
+    color: #ffffff;
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+}
+
+/* Toggle custom styling */
+.toggle-group {
+    margin-bottom: 20px;
+}
+
+.toggle-label {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 15px;
+    font-weight: 500;
+    cursor: pointer;
+}
+
+.toggle-label input {
+    display: none;
+}
+
+.toggle-custom {
+    position: relative;
+    width: 44px;
+    height: 24px;
+    background-color: var(--bg-input);
+    border-radius: 12px;
+    transition: background-color 0.2s;
+}
+
+.toggle-custom::before {
+    content: '';
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background-color: #ffffff;
+    top: 2px;
+    left: 2px;
+    transition: transform 0.2s;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.toggle-label input:checked + .toggle-custom {
+    background-color: var(--primary);
+}
+
+.toggle-label input:checked + .toggle-custom::before {
+    transform: translateX(20px);
+}
+
+/* Results Display */
+.results-container {
+    display: flex;
+    gap: 16px;
+    margin-top: 24px;
+}
+
+.result-box {
+    flex: 1;
+    background-color: var(--bg-input);
+    border: 1px solid var(--border-color);
+    border-radius: 16px;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.result-box.highlighted {
+    background: var(--primary-gradient);
+    border: none;
+}
+
+.result-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 6px;
+}
+
+.result-box.highlighted .result-label {
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.result-value {
+    font-size: 28px;
+    font-weight: 700;
+    line-height: 1;
+    margin-bottom: 4px;
+}
+
+.result-unit {
+    font-size: 12px;
+    color: var(--text-muted);
+}
+
+.result-box.highlighted .result-unit {
+    color: rgba(255, 255, 255, 0.8);
+}
+
+/* Results Grid */
+.results-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    margin-top: 24px;
+}
+
+.result-tile {
+    background-color: var(--bg-input);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 14px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.result-tile.full-width {
+    grid-column: span 2;
+}
+
+.result-tile.highlighted {
+    background: var(--primary-gradient);
+    border: none;
+    box-shadow: 0 4px 15px rgba(37, 99, 235, 0.2);
+}
+
+.tile-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 4px;
+}
+
+.result-tile.highlighted .tile-label {
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.tile-val {
+    font-size: 20px;
+    font-weight: 700;
+}
+
+.tile-unit {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-left: 4px;
+}
+
+/* Climb Trip results card */
+.trip-results-card {
+    background-color: var(--bg-main);
+    border: 1px dashed var(--border-color);
+    border-radius: 16px;
+    padding: 16px;
+    margin-top: 20px;
+}
+
+.trip-results-card h3 {
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 12px;
+    color: var(--text-muted);
+}
+
+.trip-grid {
+    display: flex;
+    gap: 12px;
+}
+
+.trip-box {
+    flex: 1;
+    background-color: var(--bg-card);
+    border-radius: 10px;
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.trip-label {
+    font-size: 10px;
+    font-weight: 500;
+    color: var(--text-muted);
+    margin-bottom: 4px;
+}
+
+.trip-val {
+    font-size: 18px;
+    font-weight: 700;
+}
+
+.trip-unit {
+    font-size: 10px;
+    color: var(--text-muted);
+}
+
+/* Weight & Balance layout */
+.wb-layout {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.header-group {
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 16px;
+}
+
+.header-group h3 {
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 12px;
+}
+
+.canvas-container {
+    width: 100%;
+    max-width: 300px;
+    margin: 0 auto;
+    background-color: #000000;
+    border: 1px solid var(--border-color);
+    border-radius: 16px;
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 10px;
+}
+
+#cgCanvas {
+    display: block;
+    width: 100%;
+    height: auto;
+}
+
+.wb-summary {
+    background-color: var(--bg-input);
+    border-radius: 16px;
+    padding: 16px;
+    margin-top: 20px;
+}
+
+.wb-status-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 12px;
+}
+
+.status-indicator {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background-color: var(--accent-success);
+}
+
+#wb-status-card.danger .status-indicator {
+    background-color: var(--accent-danger);
+}
+
+#wb-status-card.warning .status-indicator {
+    background-color: var(--accent-warning);
+}
+
+.wb-status-header h4 {
+    font-size: 15px;
+    font-weight: 600;
+}
+
+.warnings-list {
+    margin-bottom: 14px;
+    list-style-type: none;
+    font-size: 13px;
+    color: var(--accent-danger);
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.wb-summary-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+}
+
+.sum-lbl {
+    font-size: 11px;
+    color: var(--text-muted);
+    display: block;
+}
+
+.sum-val {
+    font-size: 14px;
+    font-weight: 700;
+}
+
+/* Bottom Nav Styling */
+.app-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background-color: rgba(30, 41, 59, 0.85);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-top: 1px solid var(--border-color);
+    display: flex;
+    justify-content: space-around;
+    padding: 8px 10px;
+    padding-bottom: calc(8px + var(--safe-bottom));
+    z-index: 10;
+}
+
+.nav-item {
+    background: none;
+    border: none;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    color: var(--text-muted);
+    font-family: inherit;
+    font-size: 11px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: color 0.2s;
+    width: 60px;
+}
+
+.nav-icon {
+    font-size: 20px;
+}
+
+.nav-item.active {
+    color: var(--primary-hover);
+}
+
+/* Responsive improvements for wider screens */
+@media (min-width: 768px) {
+    .app-content {
+        max-width: 800px;
+        margin: 0 auto;
+    }
+    
+    .wb-layout {
+        flex-direction: row;
+        align-items: flex-start;
+    }
+    
+    .wb-inputs {
+        flex: 1.2;
+    }
+    
+    .wb-outputs {
+        flex: 1;
+        position: sticky;
+        top: 0;
+    }
+}
+
+.input-row.compact {
+    margin-bottom: 0;
+}
+
+.wind-label-sub {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-top: -6px;
+    margin-bottom: 6px;
+}

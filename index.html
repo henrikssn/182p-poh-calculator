@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>C182P POH Calculator</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <header class="app-header">
+        <div class="logo-container">
+            <span class="plane-icon">✈</span>
+            <h1>Cessna 182P POH</h1>
+        </div>
+    </header>
+
+    <main class="app-content">
+        <!-- TAKEOFF SECTION -->
+        <section id="takeoff-tab" class="tab-content active">
+            <div class="card">
+                <h2>Takeoff Distance</h2>
+                <p class="card-subtitle">Calculate ground roll and obstacle clearance distance.</p>
+                
+                <div class="input-group">
+                    <label>Weight: <span id="val-to-weight">2950</span> lbs</label>
+                    <input type="range" id="to-weight" min="2200" max="3100" step="50" value="2950" class="slider">
+                </div>
+                
+                <div class="input-group">
+                    <label>Pressure Altitude: <span id="val-to-alt">0</span> ft</label>
+                    <input type="range" id="to-alt" min="0" max="8000" step="100" value="0" class="slider">
+                </div>
+                
+                <div class="input-group">
+                    <label>Temperature: <span id="val-to-temp">15</span> °C</label>
+                    <input type="range" id="to-temp" min="-20" max="40" step="1" value="15" class="slider">
+                </div>
+
+                <div class="results-container">
+                    <div class="result-box">
+                        <span class="result-label">Ground Roll</span>
+                        <span class="result-value" id="to-roll">-</span>
+                        <span class="result-unit">feet</span>
+                    </div>
+                    <div class="result-box highlighted">
+                        <span class="result-label">Clear 50ft Obstacle</span>
+                        <span class="result-value" id="to-total">-</span>
+                        <span class="result-unit">feet</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- LANDING SECTION -->
+        <section id="landing-tab" class="tab-content">
+            <div class="card">
+                <h2>Landing Distance</h2>
+                <p class="card-subtitle">Calculated at standard landing weight of 2950 lbs.</p>
+                
+                <div class="input-group">
+                    <label>Pressure Altitude: <span id="val-ld-alt">0</span> ft</label>
+                    <input type="range" id="ld-alt" min="0" max="8000" step="100" value="0" class="slider">
+                </div>
+                
+                <div class="input-group">
+                    <label>Temperature: <span id="val-ld-temp">15</span> °C</label>
+                    <input type="range" id="ld-temp" min="-20" max="40" step="1" value="15" class="slider">
+                </div>
+
+                <div class="results-container">
+                    <div class="result-box">
+                        <span class="result-label">Ground Roll</span>
+                        <span class="result-value" id="ld-roll">-</span>
+                        <span class="result-unit">feet</span>
+                    </div>
+                    <div class="result-box highlighted">
+                        <span class="result-label">Clear 50ft Obstacle</span>
+                        <span class="result-value" id="ld-total">-</span>
+                        <span class="result-unit">feet</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- CLIMB SECTION -->
+        <section id="climb-tab" class="tab-content">
+            <div class="card">
+                <h2>Climb Performance</h2>
+                
+                <div class="profile-switch">
+                    <button class="switch-btn active" id="climb-prof-normal">Normal (90 KIAS)</button>
+                    <button class="switch-btn" id="climb-prof-max">Max Rate (Vy)</button>
+                </div>
+
+                <div class="input-group">
+                    <label>Weight: <span id="val-cl-weight">2950</span> lbs</label>
+                    <input type="range" id="cl-weight" min="2200" max="3100" step="50" value="2950" class="slider">
+                </div>
+                
+                <div class="input-group">
+                    <label>Target Altitude: <span id="val-cl-alt">5000</span> ft</label>
+                    <input type="range" id="cl-alt" min="1000" max="14000" step="100" value="5000" class="slider">
+                </div>
+                
+                <div class="input-group">
+                    <label>Temperature at Target/Airport: <span id="val-cl-temp">15</span> °C</label>
+                    <input type="range" id="cl-temp" min="-20" max="40" step="1" value="15" class="slider">
+                </div>
+
+                <div class="toggle-group">
+                    <label class="toggle-label">
+                        <input type="checkbox" id="cl-trip-enable" checked>
+                        <span class="toggle-custom"></span>
+                        Enable Climb Trip (from Airport)
+                    </label>
+                </div>
+
+                <div id="cl-trip-inputs">
+                    <div class="input-group">
+                        <label>Airport Elevation: <span id="val-cl-aptelev">0</span> ft</label>
+                        <input type="range" id="cl-aptelev" min="0" max="8000" step="100" value="0" class="slider">
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <label>Wind Component: <span id="val-cl-wind">0</span> knots</label>
+                    <div class="wind-label-sub">(Headwind positive / Tailwind negative)</div>
+                    <input type="range" id="cl-wind" min="-30" max="30" step="1" value="0" class="slider">
+                </div>
+
+                <div class="results-grid">
+                    <div class="result-tile">
+                        <span class="tile-label">KIAS</span>
+                        <span class="tile-val" id="cl-kias">-</span>
+                    </div>
+                    <div class="result-tile">
+                        <span class="tile-label">Rate of Climb</span>
+                        <span class="tile-val" id="cl-roc">-</span>
+                        <span class="tile-unit">FPM</span>
+                    </div>
+                    <div class="result-tile">
+                        <span class="tile-label">TAS</span>
+                        <span class="tile-val" id="cl-tas">-</span>
+                        <span class="tile-unit">KT</span>
+                    </div>
+                    <div class="result-tile">
+                        <span class="tile-label">Ground Speed</span>
+                        <span class="tile-val" id="cl-gs">-</span>
+                        <span class="tile-unit">KT</span>
+                    </div>
+                    <div class="result-tile full-width highlighted">
+                        <span class="tile-label">Climb Gradient</span>
+                        <span class="tile-val" id="cl-grad">-</span>
+                    </div>
+                </div>
+
+                <!-- INTEGRATED TRIP RESULTS -->
+                <div id="cl-trip-results" class="trip-results-card">
+                    <h3>Integrated Trip to TOC</h3>
+                    <div class="trip-grid">
+                        <div class="trip-box">
+                            <span class="trip-label">Time to Climb</span>
+                            <span class="trip-val" id="trip-time">-</span>
+                            <span class="trip-unit">min</span>
+                        </div>
+                        <div class="trip-box">
+                            <span class="trip-label">Fuel Used</span>
+                            <span class="trip-val" id="trip-fuel">-</span>
+                            <span class="trip-unit">gal</span>
+                        </div>
+                        <div class="trip-box">
+                            <span class="trip-label">Distance</span>
+                            <span class="trip-val" id="trip-dist">-</span>
+                            <span class="trip-unit">NM</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- CRUISE SECTION -->
+        <section id="cruise-tab" class="tab-content">
+            <div class="card">
+                <h2>Cruise Performance</h2>
+                
+                <div class="input-group">
+                    <label>Pressure Altitude: <span id="val-cr-alt">6000</span> ft</label>
+                    <input type="range" id="cr-alt" min="2000" max="12000" step="500" value="6000" class="slider">
+                </div>
+                
+                <div class="input-group">
+                    <label>Temperature: <span id="val-cr-temp">3</span> °C</label>
+                    <input type="range" id="cr-temp" min="-25" max="35" step="1" value="3" class="slider">
+                </div>
+
+                <div class="input-row">
+                    <div class="input-col">
+                        <label for="cr-rpm">RPM</label>
+                        <select id="cr-rpm" class="select-input">
+                            <option value="2100">2100</option>
+                            <option value="2200">2200</option>
+                            <option value="2300">2300</option>
+                            <option value="2400" selected>2400</option>
+                            <option value="2500">2500</option>
+                            <option value="2600">2600</option>
+                        </select>
+                    </div>
+                    <div class="input-col">
+                        <label for="cr-mp">MP (in. Hg)</label>
+                        <select id="cr-mp" class="select-input">
+                            <!-- Populated dynamically based on alt -->
+                        </select>
+                    </div>
+                </div>
+
+                <div class="results-grid">
+                    <div class="result-tile">
+                        <span class="tile-label">Power</span>
+                        <span class="tile-val" id="cr-bhp">-</span>
+                        <span class="tile-unit">% BHP</span>
+                    </div>
+                    <div class="result-tile">
+                        <span class="tile-label">Cruise TAS</span>
+                        <span class="tile-val" id="cr-tas">-</span>
+                        <span class="tile-unit">KTAS</span>
+                    </div>
+                    <div class="result-tile full-width highlighted">
+                        <span class="tile-label">Fuel Burn Rate</span>
+                        <span class="tile-val" id="cr-ff">-</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- WEIGHT & BALANCE SECTION -->
+        <section id="wb-tab" class="tab-content">
+            <div class="card">
+                <h2>Weight & Balance</h2>
+                <p class="card-subtitle">Verify loading bounds and C.G. limits envelope.</p>
+                
+                <div class="wb-layout">
+                    <!-- Left: Sliders -->
+                    <div class="wb-inputs">
+                        <div class="input-group header-group">
+                            <h3>Aircraft Constants</h3>
+                            <div class="input-row compact">
+                                <div class="input-col">
+                                    <label>Empty Weight</label>
+                                    <input type="number" id="wb-empty-w" value="1700" class="num-input">
+                                </div>
+                                <div class="input-col">
+                                    <label>Empty Moment / 1000</label>
+                                    <input type="number" id="wb-empty-m" value="62.9" step="0.1" class="num-input">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="input-group">
+                            <label>Pilot & Front Passenger: <span id="val-wb-front">340</span> lbs</label>
+                            <input type="range" id="wb-front" min="0" max="400" step="10" value="340" class="slider">
+                        </div>
+
+                        <div class="input-group">
+                            <label>Rear Passengers: <span id="val-wb-rear">0</span> lbs</label>
+                            <input type="range" id="wb-rear" min="0" max="400" step="10" value="0" class="slider">
+                        </div>
+
+                        <div class="input-group">
+                            <label>Baggage Area A: <span id="val-wb-bag-a">0</span> lbs</label>
+                            <input type="range" id="wb-bag-a" min="0" max="120" step="5" value="0" class="slider">
+                        </div>
+
+                        <div class="input-group">
+                            <label>Baggage Area B: <span id="val-wb-bag-b">0</span> lbs</label>
+                            <input type="range" id="wb-bag-b" min="0" max="80" step="5" value="0" class="slider">
+                        </div>
+
+                        <div class="input-group">
+                            <label>Fuel Loaded: <span id="val-wb-fuel">60</span> gal</label>
+                            <input type="range" id="wb-fuel" min="10" max="80" step="2" value="60" class="slider">
+                        </div>
+
+                        <div class="input-group">
+                            <label>Estimated Fuel Burn: <span id="val-wb-fuel-burn">30</span> gal</label>
+                            <input type="range" id="wb-fuel-burn" min="0" max="80" step="2" value="30" class="slider">
+                        </div>
+                    </div>
+
+                    <!-- Right: Envelope Plot & Numerical Results -->
+                    <div class="wb-outputs">
+                        <div class="canvas-container">
+                            <canvas id="cgCanvas" width="300" height="300"></canvas>
+                        </div>
+
+                        <div class="wb-summary" id="wb-status-card">
+                            <div class="wb-status-header">
+                                <span class="status-indicator"></span>
+                                <h4 id="wb-status-title">Safe and Within Limits</h4>
+                            </div>
+                            <ul id="wb-warnings" class="warnings-list">
+                                <!-- Warning messages injected here -->
+                            </ul>
+                            
+                            <div class="wb-summary-grid">
+                                <div>
+                                    <span class="sum-lbl">Ramp Weight</span>
+                                    <span class="sum-val" id="wb-ramp-w">-</span>
+                                </div>
+                                <div>
+                                    <span class="sum-lbl">Takeoff Weight</span>
+                                    <span class="sum-val" id="wb-to-w">-</span>
+                                </div>
+                                <div>
+                                    <span class="sum-lbl">Takeoff C.G.</span>
+                                    <span class="sum-val" id="wb-to-cg">-</span>
+                                </div>
+                                <div>
+                                    <span class="sum-lbl">Landing Weight</span>
+                                    <span class="sum-val" id="wb-ld-w">-</span>
+                                </div>
+                                <div>
+                                    <span class="sum-lbl">Landing C.G.</span>
+                                    <span class="sum-val" id="wb-ld-cg">-</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- BOTTOM TAB NAVIGATION -->
+    <nav class="app-nav">
+        <button class="nav-item active" data-tab="takeoff-tab">
+            <span class="nav-icon">🛫</span>
+            <span class="nav-text">Takeoff</span>
+        </button>
+        <button class="nav-item" data-tab="landing-tab">
+            <span class="nav-icon">🛬</span>
+            <span class="nav-text">Landing</span>
+        </button>
+        <button class="nav-item" data-tab="climb-tab">
+            <span class="nav-icon">⛰</span>
+            <span class="nav-text">Climb</span>
+        </button>
+        <button class="nav-item" data-tab="cruise-tab">
+            <span class="nav-icon">🚀</span>
+            <span class="nav-text">Cruise</span>
+        </button>
+        <button class="nav-item" data-tab="wb-tab">
+            <span class="nav-icon">⚖</span>
+            <span class="nav-text">W&B</span>
+        </button>
+    </nav>
+
+    <!-- App Engine scripts -->
+    <script src="poh_data.js"></script>
+    <script src="calculator.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
