@@ -134,8 +134,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
     
     function updateClimb() {
-        const w = 2950.0;
-        clWeight.value = 2950;
+        const w = parseFloat(clWeight.value);
         const alt = parseFloat(clAlt.value);
         const temp = parseFloat(clTemp.value);
         const wind = parseFloat(clWind.value);
@@ -538,7 +537,7 @@ document.addEventListener("DOMContentLoaded", () => {
     // State persistence
     const PERSISTENT_INPUTS = [
         "dist-weight", "dist-alt", "dist-temp", "dist-runway", "dist-wind",
-        "cl-alt", "cl-temp", "cl-aptelev", "cl-wind",
+        "cl-weight", "cl-alt", "cl-temp", "cl-aptelev", "cl-wind",
         "cr-alt", "cr-temp", "cr-rpm", "cr-power-target",
         "wb-empty-w", "wb-empty-m", "wb-front", "wb-rear", "wb-bag-a", "wb-bag-b", "wb-fuel", "wb-fuel-burn"
     ];
@@ -552,6 +551,7 @@ document.addEventListener("DOMContentLoaded", () => {
             "dist-wind": "wind"
         },
         "climb": {
+            "cl-weight": "weight",
             "cl-alt": "alt",
             "cl-temp": "temp",
             "cl-aptelev": "aptelev",
