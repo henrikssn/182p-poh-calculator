@@ -80,7 +80,7 @@
             <!-- Landing Card -->
             <div class="card">
                 <h2>Landing Distance</h2>
-                <p class="card-subtitle">Calculated at standard landing weight of 2950 lbs and linked airport conditions.</p>
+                <p class="card-subtitle">Flaps 40°, Approach Speed 69 MPH (60 KIAS), heavy braking (2950 lbs per POH Figure 6-5).</p>
                 
                 <div class="results-container">
                     <div class="result-box">
@@ -103,8 +103,8 @@
                 <h2>Climb Performance</h2>
                 
                 <div class="profile-switch">
-                    <button class="switch-btn active" id="climb-prof-normal">Normal (90 KIAS)</button>
-                    <button class="switch-btn" id="climb-prof-max">Max Rate (Vy)</button>
+                    <button class="switch-btn active" id="climb-prof-max">Best Rate (Vy)</button>
+                    <button class="switch-btn" id="climb-prof-normal">Normal Enroute (105 MPH)</button>
                 </div>
 
                 <div class="input-group">
@@ -145,9 +145,9 @@
 
                 <div class="results-grid">
                     <div class="result-tile">
-                        <span class="tile-label">KIAS</span>
+                        <span class="tile-label">Airspeed</span>
                         <span class="tile-val" id="cl-kias">-</span>
-                        <span class="tile-unit">KT</span>
+                        <span class="tile-unit" id="cl-ias-unit">KT</span>
                     </div>
                     <div class="result-tile">
                         <span class="tile-label">Rate of Climb</span>

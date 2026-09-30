@@ -72,11 +72,14 @@ class POHCalculator {
             let roll = res[0];
             let total = res[1];
             
-            // Apply wind correction
+            // Apply wind correction: POH Figure 6-3 Table lists headwind 0, 10, 20 kt:
+            // At 10 kt headwind: 30.5% ground roll reduction, 24.1% total distance reduction
+            // At 20 kt headwind: 56.0% ground roll reduction, 45.2% total distance reduction
             if (wind > 0) {
-                let factor = 1.0 - 0.10 * (wind / 9.0);
-                roll *= factor;
-                total *= factor;
+                let rFactor = Math.max(0.2, 1.0 - (wind / 10.0) * 0.305);
+                let tFactor = Math.max(0.2, 1.0 - (wind / 10.0) * 0.241);
+                roll *= rFactor;
+                total *= tFactor;
             } else if (wind < 0) {
                 let tailwind = Math.min(10.0, -wind);
                 let factor = 1.0 + 0.10 * (tailwind / 2.0);
@@ -84,9 +87,10 @@ class POHCalculator {
                 total *= factor;
             }
             
-            // Apply runway material correction (grass adds 15% of ground roll to both roll and total)
+            // Apply runway material correction: HB-CDU POH Figure 6-3 Note 2:
+            // "For operation on a dry, grass runway, increase distances (both 'ground run' and 'total to clear 50 ft. obstacle') by 7% of the 'total to clear 50 ft. obstacle' figure."
             if (runway === "grass") {
-                let correction = roll * 0.15;
+                let correction = total * 0.07;
                 roll += correction;
                 total += correction;
             }
@@ -97,15 +101,16 @@ class POHCalculator {
     }
     
     getLanding(alt, temp, runway = "paved", wind = 0) {
-        // Landing is evaluated at fixed landing weight 2950 lbs
+        // Landing is evaluated at fixed landing weight 2950 lbs per HB-CDU Figure 6-5
         let res = interpolateRecursive(this.data.landing_dims, this.data.landing_data, [2950, alt, temp]);
         if (res) {
             let roll = res[0];
             let total = res[1];
             
-            // Apply wind correction
+            // Apply wind correction: HB-CDU POH Figure 6-5 Note 2:
+            // "Reduce landing distances 10% for each 5 knots headwind."
             if (wind > 0) {
-                let factor = 1.0 - 0.10 * (wind / 9.0);
+                let factor = Math.max(0.1, 1.0 - 0.10 * (wind / 5.0));
                 roll *= factor;
                 total *= factor;
             } else if (wind < 0) {
@@ -115,9 +120,10 @@ class POHCalculator {
                 total *= factor;
             }
             
-            // Apply runway material correction (grass adds 45% of ground roll to both roll and total)
+            // Apply runway material correction: HB-CDU POH Figure 6-5 Note 3:
+            // "For operation on a dry, grass runway, increase distances (both 'ground roll' and 'total to clear 50 ft. obstacle') by 20% of the 'total to clear 50 ft. obstacle' figure."
             if (runway === "grass") {
-                let correction = roll * 0.45;
+                let correction = total * 0.20;
                 roll += correction;
                 total += correction;
             }
@@ -168,14 +174,26 @@ class POHCalculator {
     }
     
     _getClimbPerf(weight, alt, temp, profile) {
+        let maxPerf = this.getClimb(weight, alt, temp);
+        if (!maxPerf) return null;
         if (profile === 'normal') {
-            return this.getNormalClimb(weight, alt, temp);
+            // Normal Enroute Climb (HB-CDU Section 1-5 & 2-13: 100-110 MPH / 91 KIAS at 23" MP, 2450 RPM)
+            return {
+                kias: 91.0,
+                mph: 105.0,
+                rate_of_climb_fpm: Math.round(maxPerf.rate_of_climb_fpm * 0.65)
+            };
         } else {
-            return this.getClimb(weight, alt, temp);
+            // HB-CDU POH Figure 6-3: Maximum Rate-of-Climb Data (Vy)
+            return {
+                kias: maxPerf.kias,
+                mph: Math.round(maxPerf.kias * 1.15078),
+                rate_of_climb_fpm: maxPerf.rate_of_climb_fpm
+            };
         }
     }
     
-    calculateClimbGradient(weight, alt, temp, aptElev, wind, profile = "normal") {
+    calculateClimbGradient(weight, alt, temp, aptElev, wind, profile = "max_rate") {
         if (aptElev === null || aptElev === undefined) {
             // Instantaneous
             let res = this._getClimbPerf(weight, alt, temp, profile);
@@ -203,6 +221,7 @@ class POHCalculator {
             return {
                 lapsed_temp: Math.round(temp * 100) / 100,
                 kias: kias,
+                mph: res.mph,
                 roc_fpm: Math.round(roc * 10) / 10,
                 tas_kt: Math.round(tas * 10) / 10,
                 eff_wind_kt: Math.round(effWind * 10) / 10,

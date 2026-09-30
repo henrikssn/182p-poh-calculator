@@ -94,7 +94,7 @@ document.addEventListener("DOMContentLoaded", () => {
     distWind.addEventListener("input", updateDistances);
     
     // CLIMB TAB Logic
-    let climbProfile = "normal";
+    let climbProfile = "max_rate";
     const clWeight = document.getElementById("cl-weight");
     const clAlt = document.getElementById("cl-alt");
     const clTemp = document.getElementById("cl-temp");
@@ -150,6 +150,10 @@ document.addEventListener("DOMContentLoaded", () => {
         const res = calc.calculateClimbGradient(w, alt, temp, aptElev, wind, climbProfile);
         if (res) {
             document.getElementById("cl-kias").textContent = res.kias;
+            const unitEl = document.getElementById("cl-ias-unit");
+            if (unitEl) {
+                unitEl.textContent = res.mph ? `KT (${res.mph} MPH)` : "KT";
+            }
             document.getElementById("cl-roc").textContent = Math.round(res.roc_fpm);
             document.getElementById("cl-tas").textContent = Math.round(res.tas_kt);
             document.getElementById("cl-gs").textContent = Math.round(res.gs_kt);
@@ -670,6 +674,8 @@ document.addEventListener("DOMContentLoaded", () => {
             climbProfile = urlParams.get("profile");
         } else if (state["climbProfile"] !== undefined) {
             climbProfile = state["climbProfile"];
+        } else {
+            climbProfile = "max_rate";
         }
         if (climbProfile === "normal") {
             btnNormal.classList.add("active");
